@@ -3,10 +3,14 @@ import bcrypt from "bcryptjs";
 import { asyncHandler } from "../middleware/asyncHandler";
 import { parseBody } from "../middleware/validate";
 import { badRequest, notFound } from "../errors/httpError";
-import { studentSchema } from "../schemas/schemas";
+import {
+  studentSchema,
+  studentUpdateSchema,
+} from "../schemas/schemas";
 import {
   toPublicStudent,
   type StudentInput,
+  type StudentUpdateInput,
   type StudentRepository,
 } from "../repositories/studentRepository";
 import { config } from "../config/env";
@@ -51,9 +55,33 @@ export function createStudentController(students: StudentRepository) {
 
   const update = asyncHandler(async (req: Request, res: Response) => {
     const id = parseId(req.params.id);
-    if (!students.findById(id)) throw notFound("Estudiante no encontrado");
-    const input = await toInput(req.body);
-    res.json({ data: toPublicStudent(students.update(id, input)) });
+
+    if (!students.findById(id)) {
+      throw notFound("Estudiante no encontrado");
+    }
+
+    const data = parseBody(studentUpdateSchema, req.body);
+
+    const input: StudentUpdateInput = {
+      nombre: data.nombre,
+      apellido: data.apellido,
+      matricula: data.matricula,
+      email: data.email,
+    };
+
+    // Cambiar la contraseña solamente si se proporcionó una nueva.
+    if (data.password) {
+      input.passwordHash = await bcrypt.hash(
+        data.password,
+        config.bcryptRounds,
+      );
+    }
+
+    const updatedStudent = students.update(id, input);
+
+    res.json({
+      data: toPublicStudent(updatedStudent),
+    });
   });
 
   const remove = asyncHandler(async (req: Request, res: Response) => {

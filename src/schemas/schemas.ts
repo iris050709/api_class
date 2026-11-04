@@ -17,5 +17,16 @@ export const studentSchema = z.object({
     .min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
+export const studentUpdateSchema = z.object({
+  nombre: z.string().trim().min(1, "El nombre es obligatorio"),
+  apellido: z.string().trim().min(1, "El apellido es obligatorio"),
+  matricula: z.string().trim().min(1, "La matrícula es obligatoria"),
+  email: z.string().trim().email("El correo electrónico no es válido"),
+  password: z
+    .string()
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
+    .optional(),
+});
+
 export type Credentials = z.infer<typeof credentialsSchema>;
 export type StudentPayload = z.infer<typeof studentSchema>;

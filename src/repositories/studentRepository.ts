@@ -22,6 +22,15 @@ export interface StudentInput {
   passwordHash: string;
 }
 
+
+export interface StudentUpdateInput {
+  nombre: string;
+  apellido: string;
+  matricula: string;
+  email: string;
+  passwordHash?: string;
+}
+
 export function toPublicStudent(row: StudentRow): PublicStudent {
   const { password_hash: _omit, ...rest } = row;
   return rest;
@@ -63,22 +72,40 @@ export class StudentRepository {
     return this.findById(Number(info.lastInsertRowid))!;
   }
 
-  update(id: number, input: StudentInput): StudentRow {
-    this.db
-      .prepare(
-        `UPDATE students
-         SET nombre = ?, apellido = ?, matricula = ?, email = ?,
-             password_hash = ?, updated_at = datetime('now')
-         WHERE id = ?`,
-      )
-      .run(
-        input.nombre,
-        input.apellido,
-        input.matricula,
-        input.email,
-        input.passwordHash,
-        id,
-      );
+  update(id: number, input: StudentUpdateInput): StudentRow {
+    if (input.passwordHash) {
+      this.db
+        .prepare(
+          `UPDATE students
+          SET nombre = ?, apellido = ?, matricula = ?, email = ?,
+              password_hash = ?, updated_at = datetime('now')
+          WHERE id = ?`,
+        )
+        .run(
+          input.nombre,
+          input.apellido,
+          input.matricula,
+          input.email,
+          input.passwordHash,
+          id,
+        );
+    } else {
+      this.db
+        .prepare(
+          `UPDATE students
+          SET nombre = ?, apellido = ?, matricula = ?, email = ?,
+              updated_at = datetime('now')
+          WHERE id = ?`,
+        )
+        .run(
+          input.nombre,
+          input.apellido,
+          input.matricula,
+          input.email,
+          id,
+        );
+    }
+
     return this.findById(id)!;
   }
 
