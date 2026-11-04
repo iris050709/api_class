@@ -17,3 +17,17 @@ export function requireAuth(authService: AuthService) {
     next();
   };
 }
+
+import { HttpError } from "../errors/httpError";
+
+export function requireUser(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
+  if (req.auth?.kind !== "user") {
+    throw new HttpError(403, "No tienes permiso para acceder a estudiantes");
+  }
+
+  next();
+}

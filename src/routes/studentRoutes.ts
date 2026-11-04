@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createStudentController } from "../controllers/studentController";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth, requireUser } from "../middleware/auth";
 import type { AuthService } from "../services/authService";
 import type { StudentRepository } from "../repositories/studentRepository";
 
@@ -12,15 +12,14 @@ export function createStudentRouter(
   const router = Router();
   const controller = createStudentController(students);
   const auth = requireAuth(authService);
+  const admin = requireUser;
 
-  // Crear estudiante es público (sin token) por requerimiento del proyecto.
-  router.post("/", controller.create);
-
-  // El resto de operaciones requieren token JWT.
-  router.get("/", auth, controller.list);
-  router.get("/:id", auth, controller.getOne);
-  router.put("/:id", auth, controller.update);
-  router.delete("/:id", auth, controller.remove);
+  // Todas las operaciones requieren una cuenta de tipo user.
+  router.post("/", auth, admin, controller.create);
+  router.get("/", auth, admin, controller.list);
+  router.get("/:id", auth, admin, controller.getOne);
+  router.put("/:id", auth, admin, controller.update);
+  router.delete("/:id", auth, admin, controller.remove);
 
   return router;
 }

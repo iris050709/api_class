@@ -41,7 +41,7 @@ export function createAuthController(authService: AuthService) {
     const user = await authService.getProfile(payload);
 
     res.json({
-      data: user,
+      data: user, //data: {id: parseInt(payload.sub), email: payload.email} ESTO OBTIENE UNICAMENTE EL IDENTIFICADOR Y EL CORREO ELECTRONICO
     });
   });
 

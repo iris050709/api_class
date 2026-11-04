@@ -44,6 +44,26 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires ON refresh_tokens(expires_
 `;
 
 /**
+ * Se omite la clave foránea:
+ * FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+ *
+ * Motivo:
+ * La tabla refresh_tokens almacena tokens de dos tipos de usuarios:
+ * - user: registrados en la tabla users.
+ * - student: registrados en la tabla students.
+ *
+ * SQLite únicamente permitiría validar user_id contra users(id),
+ * incluso cuando user_kind = 'student'.
+ *
+ * Esto provocaría un error FOREIGN KEY constraint failed si el
+ * estudiante no tiene un registro correspondiente en users.
+ *
+ * La validación de existencia del usuario debe realizarse desde
+ * authService, considerando el valor de user_kind.
+ */
+
+
+/**
  * Crea (o abre) una base SQLite, aplica el esquema y la devuelve.
  * Usa ":memory:" para una base en memoria (útil en pruebas).
  */
