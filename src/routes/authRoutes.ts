@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 import { createAuthController } from "../controllers/authController";
 import { requireAuth, requireUser } from "../middleware/auth";
@@ -10,18 +9,15 @@ export function createAuthRouter(
   const router = Router();
 
   const controller = createAuthController(authService);
-
   const auth = requireAuth(authService);
 
-  // Registro de usuarios: solamente administradores.
-  router.post(
-    "/register",
-    auth,
-    requireUser,
-    controller.register,
-  );
+  // Iniciar sesión.
+  router.post("/login", controller.login);
+  
+  // Registro público de administradores.
+  router.post("/register", controller.register);
 
-  // Crear otro usuario administrador desde la aplicación.
+  // Crear otro administrador.
   router.post(
     "/users",
     auth,
@@ -29,10 +25,7 @@ export function createAuthRouter(
     controller.register,
   );
 
-  // Inicio de sesión.
-  router.post("/login", controller.login);
-
-  // Renovación de tokens.
+  // Renovar tokens.
   router.post("/refresh", controller.refresh);
 
   // Cerrar sesión.
